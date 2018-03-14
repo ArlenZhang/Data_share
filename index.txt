@@ -1,0 +1,20 @@
+
+                            目            录
+
+Demo1 ...................... 入门
+Demo2 ...................... TensorBoard, Constants, specific value
+Demo3 ...................... Variables
+Demo4 ...................... PlaceHolder, Feedable
+Demo5 ...................... Lazy loading
+Demo6 ...................... shape 诠释字符/词语/句子之间的表示
+Demo7 ...................... linear regression & placeholder
+Demo8 ...................... linear regression & tf.data
+Demo9-1..................... Mat-plot-lib 科学绘图
+Demo9-2..................... Matplotlib + Pandas
+Demo10...................... 矩阵点乘和叉乘法
+Demo11...................... Logistic Regression
+Demo12...................... Eager Execution 动态图机制,举例线性拟合
+Demo13...................... Word2vec in tf
+Demo14...................... Word2vec Skip-Gram, run graphs to compare, better use of tensorboard
+Demo15...................... Word2vec CBOW in RST-DT
+Demo16...................... CNNs in Tensorflow
