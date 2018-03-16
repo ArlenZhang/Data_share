@@ -1,0 +1,1 @@
+l = sum(sum(tf.multiply(self.p_(s_j), tf.log(self.softmax_(s_j, i))) for s_j in self.target_sents_embed[i]) for i in self.batch_size)
