@@ -1,7 +1,6 @@
-<<<<<<< HEAD
-    # 判断当前样本的正负,返回的是当前i对应的target全体的一批flag
+
     def p_(self, i):
-        return self.target_pos_neg_flag[i]
+        return 
 
     def softmax_(self, s_j, i):
         tf.divide(tf.exp(tf.matmul(tf.transpose(s_j), self.context_sents_embed[i])),
@@ -9,13 +8,13 @@
                             self.target_sents_embed[i]]))
         return True
 
-    # 对输入的一批batch_size的数据计算loss，最小化loss的过程得到最优的center_sents_embed
     def _create_loss(self):
         with tf.name_scope('loss'):
-            # 思路：用python里面的一行函数就可以表达数学公式 fenmu += exp_(i.s_c) for i in sk_list
-            l_ = tf.add_n([tf.add_n([tf.multiply(self.p_(i), tf.log(self.softmax_(s_j, i))) for s_j in
-                                    self.target_sents_embed[i]])] for i in self.batch_size)
-            self.loss = tf.multiply(-1, l_)
-=======
-l = tf.add_n([tf.add_n([tf.multiply(self.p_(s_j), tf.log(self.softmax_(s_j, i))) for s_j in self.target_sents_embed[i]]) for i in self.batch_size])
->>>>>>> a56fa233af7650b59839bc9c1af0fa5dc9ed401a
+            l_ = tf.add_n([tf.add_n([tf.multiply(self.self.target_pos_neg_flag[i], tf.log(
+			tf.divide(tf.exp(tf.matmul(tf.transpose(s_j), self.context_sents_embed[i])),
+                  tf.add_n([tf.exp(tf.matmul(tf.transpose(s_k), self.context_sents_embed[i])) for s_k in
+                            self.target_sents_embed[i]]))
+			)) for s_j in self.target_sents_embed[i]])] for i in self.batch_size)
+            
+			self.loss = tf.multiply(-1, l_)
+
