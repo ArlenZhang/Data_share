@@ -1,0 +1,3 @@
+cosin_dis = tf.divide(tf.reduce_sum(tf.multiply(self.context_sents_embed, self.target_sents_embed), 2),
+                                  tf.multiply(tf.sqrt(tf.reduce_sum(tf.square(self.context_sents_embed), 2)),
+                                              tf.sqrt(tf.reduce_sum(tf.square(self.target_sents_embed), 2))))
