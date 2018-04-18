@@ -17,13 +17,10 @@ from structure import RelationNode
 from structure.wrapper import BinarizeTreeWrapper
 import logging
 
-
 logger = logging.getLogger(__name__)
-
 
 _UNK = '<UNK>'
 _DUMB = '<DUMB>'
-
 
 class Reducer(nn.Module):
     def __init__(self, hidden_size):
@@ -38,7 +35,6 @@ class Reducer(nn.Module):
         c = a.tanh() * i.sigmoid() + f1.sigmoid() * c1 + f2.sigmoid() * c2
         h = o.sigmoid() * c.tanh()
         return torch.cat([h, c])
-
 
 class Tracker(nn.Module):
     def __init__(self, hidden_size):
@@ -55,7 +51,6 @@ class Tracker(nn.Module):
         cell_input = torch.cat([s2h, s1h, b1h]).view(1, -1)
         tracking_h, tracking_c = self.rnn(cell_input, state)
         return tracking_h.view(-1), tracking_c.view(-1)
-
 
 class SPINN(nn.Module):
     SHIFT = "SHIFT"
@@ -130,7 +125,7 @@ class SPINN(nn.Module):
             s2 = stack.pop()
             compose = self.reducer(s2, s1)
             stack.append(compose)
-        tracking = self.tracker(stack, buffer, tracking)
+        tracking = self.tracker(stack, buffer, tracking)  # 调用tarckerforward
         return stack, buffer, tracking
 
 class SPINNSRModel(Model):
@@ -156,24 +151,26 @@ class SPINNSRModel(Model):
 
     def session(self, tree):
         return self.model.new_session(tree)
-
+	
+	# 计算分数
     def score(self, session):
         return self.model.score(session).data[0]
 
     def shift(self, session, copy=False):
         if copy:
             session = self.model.copy_session(session)
-        return self.model(session, SPINN.SHIFT)
+        return self.model(session, SPINN.SHIFT)  # 调用SPINN的forward
 
     def reduce(self, session, copy=False):
         if copy:
             session = self.model.copy_session(session)
         return self.model(session, SPINN.REDUCE)
-
+	
+	# 训练过程
     def train(self, trees, trees_eval=None):
         random.seed(self.args.seed)
         trees = trees[:]
-        criterion = nn.BCELoss()
+        criterion = nn.BCELoss()  # 创建测量二元交叉熵的标准
         optimizer = optim.RMSprop(self.model.parameters(), lr=self.args.spinn_lr)
 
         niter = 0
@@ -193,14 +190,14 @@ class SPINNSRModel(Model):
                     reduce_ground.append(1 if trans == SPINN.REDUCE else 0)
                 pred = torch.cat(reduce_score)
                 ground = Var(torch.FloatTensor(reduce_ground))
-                loss += criterion(pred, ground)
-                # batch
+                loss += criterion(pred, ground)  # 对一棵树的递归过程中的loss求和
+                # batch 批
                 if niter % self.args.spinn_batch == 0 and niter > 0:
                     nbatch += 1
                     # backward
-                    loss.backward()
-                    optimizer.step()
-                    optimizer.zero_grad()
+                    loss.backward()  # 反向传播
+                    optimizer.step()  # 同步更新所有参数
+                    optimizer.zero_grad()  # 梯度清0
 
                     # log and evaluate
                     if nbatch % self.args.spinn_logevery == 0:
@@ -208,9 +205,10 @@ class SPINNSRModel(Model):
                             eval_loss = self.evaluate(trees_eval)
                         else:
                             eval_loss = None
+						# 计算得到评测loss
                         logger.log(logging.INFO, "[iter %-5d epoch %-3d  batch %-3d] train loss:%.5f eval loss:%.5f"
                                    % (niter, epoch, nbatch, loss.data[0] / self.args.spinn_batch, eval_loss))
-                        loss = 0.
+                        loss = 0.  # 一批计算之后，loss清0
                     # checkpoint
                     yield nbatch
 
@@ -254,3 +252,23 @@ class SPINNSRModel(Model):
             torch_model = torch.load(torch_fd)
         model.model = torch_model
         return model
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
