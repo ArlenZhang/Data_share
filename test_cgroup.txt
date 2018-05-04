@@ -1,0 +1,32 @@
+# 下载一个可以模拟cpu高负载的工具,mathomatic是质数生成器，会加大处理器的负荷
+ wget http://mathomatic.orgserve.de/mathomatic-16.0.5.tar.bz2 
+ 
+tar xf mathomatic-16.0.5.tar.bz2
+cd mathomatic-16.0.5/primes/
+make && make install        #  编译安装
+ 
+# centos7系统需要安装libcgroup-tools包，才有cgroup配置命令
+yum install -y libcgroup-tools.x86_64
+ 
+# 创建两个不同cpu资源分配的组
+cgcreate -g cpu:/large      # 具体命令使用cgcreate -h
+cgcreate -g cpu:/small
+ 
+# cpu.shares是cpu控制的一个属性,更多的属性
+# 可以到/sys/fs/cgroup/cpu目录下查看，默认值是1024，值越大，能获得更多的cpu时间
+cgset -r cpu.shares=512 small 
+ 
+# cgexec启动一个cgroup任务
+matho-primes 0 999999999 > /dev/null &  # 生成一个从0到999999999的质数列表
+cgexec -g cpu:small /usr/local/bin/matho-primes 0 999999999 > /dev/null & # 后台运行
+ 
+# 使用top命令查看发现cpu被100%占用，因为是一个单独的进程，它使用尽可能多的cpu
+# cgroups限制仅在两个或多个以上进程竞争cpu资源时起作用
+ PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND     
+ 6726 root      20   0    9208   2540    488 R  99.9  0.0   0:34.47 matho-primes
+ 
+cgexec -g cpu:large /usr/local/bin/matho-primes 0 9999999999 > /dev/null
+cgexec -g cpu:small /usr/local/bin/matho-primes 0 9999999999 > /dev/null
+cgexec -g cpu:small /usr/local/bin/matho-primes 0 9999999999 > /dev/null  
+# 在small组中起两个matho-primes进程，然后top观察cpu时间
+# small组两个matho-primes进程差不多共享cpu，large组的进程得到更多的cpu时间
